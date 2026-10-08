@@ -1630,15 +1630,15 @@ def _get_column_projection_values(
     file_project_field_ids: set[int],
 ) -> dict[int, Any]:
     """Resolve missing identity partition values for output and filter columns."""
-    project_schema_diff = projected_field_ids.difference(file_project_field_ids)
-    if len(project_schema_diff) == 0 or partition_spec is None:
+    missing_field_ids = projected_field_ids.difference(file_project_field_ids)
+    if len(missing_field_ids) == 0 or partition_spec is None:
         return EMPTY_DICT
 
     partition_schema = partition_spec.partition_type(table_schema)
     accessors = build_position_accessors(partition_schema)
 
     projected_missing_fields = {}
-    for field_id in project_schema_diff:
+    for field_id in missing_field_ids:
         for partition_field in partition_spec.fields_by_source_id(field_id):
             if isinstance(partition_field.transform, IdentityTransform):
                 partition_value = accessors[partition_field.field_id].get(file.partition)
